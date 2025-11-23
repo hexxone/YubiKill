@@ -4,18 +4,30 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Usb.Events;
 
-const string configFileName = "yubikill_config.json";
+const string configFileName = ".yubikill_config.json";
 
-if (args.Contains("--configure"))
+var fullConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), configFileName);
+
+var configExists = File.Exists(fullConfigPath);
+if (!configExists)
 {
-    RunConfigurationMode();
+    Console.WriteLine($"Configuration file not found at: {fullConfigPath}.");
+}
+
+var hiddenArg = args.Contains("--hidden");
+
+if (args.Contains("--configure") || !configExists)
+{
+    RunConfigurationMode(fullConfigPath);
 }
 else
 {
-    RunMonitorMode();
+    await RunMonitorMode(fullConfigPath, hiddenArg);
 }
 
-static void RunConfigurationMode()
+return;
+
+static void RunConfigurationMode(string fullConfigPath)
 {
     Console.WriteLine("--- YubiKill Setup Mode ---");
 
@@ -29,11 +41,11 @@ static void RunConfigurationMode()
     var currentDevices = usbEventWatcher.UsbDeviceList;
     var selectedTriggers = new List<DeviceTrigger>();
 
-    if (File.Exists(configFileName))
+    if (File.Exists(fullConfigPath))
     {
         try
         {
-            var existingConfig = JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(configFileName), AppJsonContext.Default.AppConfig);
+            var existingConfig = JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(fullConfigPath), AppJsonContext.Default.AppConfig);
             if (existingConfig?.TriggerDevices != null)
             {
                 selectedTriggers = existingConfig.TriggerDevices;
@@ -121,23 +133,17 @@ static void RunConfigurationMode()
         Action = action
     };
 
-    File.WriteAllText(configFileName, JsonSerializer.Serialize(config, AppJsonContext.Default.AppConfig));
-    Console.WriteLine($"Configuration saved to {Path.GetFullPath(configFileName)}");
+    File.WriteAllText(fullConfigPath, JsonSerializer.Serialize(config, AppJsonContext.Default.AppConfig));
+    Console.WriteLine($"Configuration saved to {Path.GetFullPath(fullConfigPath)}");
+    Console.WriteLine("Please restart the app now.");
 }
 
-static void RunMonitorMode()
+static async Task RunMonitorMode(string fullConfigPath, bool hiddenArg)
 {
-    if (!File.Exists(configFileName))
-    {
-        Console.WriteLine($"Configuration file not found at {configFileName}.");
-        Console.WriteLine("Please run with '--configure' first to setup trigger devices.");
-        return;
-    }
-
     AppConfig? config;
     try
     {
-        config = JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(configFileName), AppJsonContext.Default.AppConfig);
+        config = JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(fullConfigPath), AppJsonContext.Default.AppConfig);
     }
     catch (Exception ex)
     {
@@ -164,10 +170,36 @@ static void RunMonitorMode()
         Console.WriteLine($"TRIGGER DEVICE REMOVED: {device.DeviceName}");
         ExecuteAction(config.Action);
     };
+    
+    if (hiddenArg)
+    {
+        Console.WriteLine("YubiKill Active in Background...");
+    
+        // DO NOT USE Console.ReadLine() HERE.
+        // It returns null immediately when no Terminal is attached.
+    
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            try
+            {
+                // Use 'display notification' which is safe for Background Apps (LSUIElement)
+                // unlike 'display dialog' which demands focus and causes Error 1002.
+                Process.Start("osascript", "-e \"display notification \\\"Check Activity Monitor to stop.\\\" with title \\\"YubiKill Started\\\"\"");
+            }
+            catch
+            {
+                // Ignore notification failures
+            }
+        }
 
-    // Keep the application running
-    Console.WriteLine("Press Enter to exit (or kill process).");
-    Console.ReadLine();
+        // Use this instead to keep the app running forever:
+        await Task.Delay(-1); 
+    }
+    else
+    {
+        Console.WriteLine("Press Enter to exit (or kill process).");
+        Console.ReadLine(); // This is fine only when a Terminal IS present
+    }
 }
 
 static void ExecuteAction(TriggerAction action)
@@ -185,13 +217,51 @@ static void ExecuteAction(TriggerAction action)
                 }
                 else // Linux and MacOS
                 {
-                    Process.Start("shutdown", "-h now");
+                    try
+                    {
+                        // mostly requires root, which we probably don't have.
+                        Process.Start("halt", "-q");
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            Process.Start("poweroff", "-f");
+                        }
+                        catch
+                        {
+                            Process.Start("shutdown", "-h now");
+                        }
+                    }
                 }
 
                 break;
             }
             case TriggerAction.Logout:
-                // TODO logout User...
+                Console.WriteLine("Logging out...");
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    Process.Start("shutdown", "/l");
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    // “killall loginwindow” immediately terminates the user session.
+                    // This does not require any special permissions, as loginwindow belongs to the user.
+                    Process.Start("killall", "loginwindow");
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    try
+                    {
+                        // clean way with systemd
+                        Process.Start("loginctl", $"terminate-user {Environment.UserName}");
+                    }
+                    catch
+                    {
+                        // Fallback: kill everything from User (big bonk)
+                        Process.Start("pkill", $"-KILL -u {Environment.UserName}");
+                    }
+                }
                 break;
             case TriggerAction.Lock:
             {
@@ -202,10 +272,7 @@ static void ExecuteAction(TriggerAction action)
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    // Uses AppleScript to trigger the standard "Lock Screen" shortcut (Ctrl+Cmd+Q)
-                    // Alternatively, 'pmset displaysleepnow' could be used but that only sleeps display.
-                    Process.Start("osascript",
-                        "-e \"tell application \\\"System Events\\\" to keystroke \\\"q\\\" using {control down, command down}\"");
+                    SACLockScreenImmediate();
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
@@ -230,6 +297,9 @@ static void ExecuteAction(TriggerAction action)
         // In case of failure, we might want to force exit or try an alternative
     }
 }
+
+[DllImport("/System/Library/PrivateFrameworks/login.framework/Versions/Current/login")]
+static extern int SACLockScreenImmediate();
 
 [JsonSourceGenerationOptions(WriteIndented = true, UseStringEnumConverter = true)]
 [JsonSerializable(typeof(AppConfig))]

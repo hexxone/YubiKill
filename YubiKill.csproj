@@ -6,7 +6,30 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PublishAot>true</PublishAot>
+        <PublishSingleFile>true</PublishSingleFile>
+        <SelfContained>true</SelfContained>
+        <StripSymbols>true</StripSymbols>
+        <DebugSymbols>false</DebugSymbols>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
         <InvariantGlobalization>true</InvariantGlobalization>
+        <IsPackable>false</IsPackable>
+        <Title>YubiKill</Title>
+        <Authors>hexxone</Authors>
+        <Description>YubiKill</Description>
+        <Copyright>hexxone</Copyright>
+        <PackageProjectUrl>https://github.com/hexxone/YubiKill</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/hexxone/YubiKill/blob/main/LICENSE</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/hexxone/YubiKill</RepositoryUrl>
+        <AssemblyVersion>1.0.0</AssemblyVersion>
+        <FileVersion>1.0.0</FileVersion>
+        <NeutralLanguage>en</NeutralLanguage>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>YubiKill.snk</AssemblyOriginatorKeyFile>
+        <PublicSign>true</PublicSign>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DebugType>none</DebugType>
     </PropertyGroup>
 
     <ItemGroup>
