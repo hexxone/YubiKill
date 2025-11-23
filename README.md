@@ -1,10 +1,14 @@
 # YubiKill
 
+A versatile cross-platform USB dead-man-switch for your PC.
+
+Inspired by the [BusKill App](https://github.com/BusKill/buskill-app), which seems to be no longer maintained sadly.
+
+## Overview
+
 This is designed / intended to be used with a ["BusKill-Cable"](https://docs.buskill.in/buskill-app/en/stable/hardware_dev/bom.html), 
 which you can make yourself for around 50$. There are "USB-A" and also "USB-C" variants. Essentially, you only need a
 magnetic USB "break-away" adapter and a fitting cable with a device you can tether to yourself.
-
-Inspired by the [BusKill App](https://github.com/BusKill/buskill-app), which seems to be no longer maintained sadly.
 
 Hence, here is a "fresh" and clean CLI remake of BusKill, also intended to work for NON-Storage USB Devices, like:
 `SmartCards`, `Keyboards`, `Mice`, `YubiKeys`, `USB-Hubs`, etc. and also work Cross-platform!
@@ -14,7 +18,7 @@ Generally everything "USB" with some kind of identifier-information should work.
 In theory, we could also listen to a specific USB-Port via the "path" but that seems rather unreliable in comparison 
 to a specific trigger device. Let me know if that's a use-case for you.
 
-## Notice
+## Important for macOS
 
 Currently, the nuget package `Jinjinov/Usb.Events` doesn't work fully on some macOS machines due to path limitations.
 
@@ -25,7 +29,7 @@ Hence, I forked and fixed it here: https://github.com/Jinjinov/Usb.Events/pull/5
 If that hasn't happened yet, and you want to use it on macOS, you have to check out my fork locally, add it as a Reference
 to this "Solution" file and then add it as a Reference to the "Project" file, after removing the installed Nuget package.
 
-Then you should be able to get a working build for macOS.
+Then you should be able to get a working build.
 
 ## Actions
 
