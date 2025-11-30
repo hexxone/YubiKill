@@ -33,7 +33,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Usb.Events\Usb.Events\Usb.Events.csproj" />
+      <PackageReference Include="Usb.Events" Version="11.1.1.1" />
     </ItemGroup>
 
 </Project>

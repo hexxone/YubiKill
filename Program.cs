@@ -224,14 +224,31 @@ static void ExecuteAction(TriggerAction action)
                     }
                     catch
                     {
-                        try
-                        {
-                            Process.Start("poweroff", "-f");
-                        }
-                        catch
-                        {
-                            Process.Start("shutdown", "-h now");
-                        }
+                        // ignored
+                    }
+                    try
+                    {
+                        Process.Start("echo", "o > /proc/sysrq-trigger ");
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                    try
+                    {
+                        Process.Start("poweroff", "--force --no-sync");
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                    try
+                    {
+                        Process.Start("shutdown", "-h now");
+                    }
+                    catch
+                    {
+                        // ignored
                     }
                 }
 

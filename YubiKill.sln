@@ -2,8 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YubiKill", "YubiKill.csproj", "{E6681726-24AA-4637-9922-33BB44083AD1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Usb.Events", "..\..\Usb.Events\Usb.Events\Usb.Events.csproj", "{397FFEB6-A899-417C-A2D1-1274DE1BE1D6}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,9 +12,5 @@ Global
 		{E6681726-24AA-4637-9922-33BB44083AD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E6681726-24AA-4637-9922-33BB44083AD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E6681726-24AA-4637-9922-33BB44083AD1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{397FFEB6-A899-417C-A2D1-1274DE1BE1D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{397FFEB6-A899-417C-A2D1-1274DE1BE1D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{397FFEB6-A899-417C-A2D1-1274DE1BE1D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{397FFEB6-A899-417C-A2D1-1274DE1BE1D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
