@@ -18,19 +18,6 @@ Generally everything "USB" with some kind of identifier-information should work.
 In theory, we could also listen to a specific USB-Port via the "path" but that seems rather unreliable in comparison 
 to a specific trigger device. Let me know if that's a use-case for you.
 
-## Important for macOS
-
-Currently, the nuget package `Jinjinov/Usb.Events` doesn't work fully on some macOS machines due to path limitations.
-
-E.g.: if you have several nested USB Hubs (haha thanks Apple), the Path might be too long and crash the event listener.
-
-Hence, I forked and fixed it here: https://github.com/Jinjinov/Usb.Events/pull/56 and am currently waiting for PR merge.
-
-If that hasn't happened yet, and you want to use it on macOS, you have to check out my fork locally, add it as a Reference
-to this "Solution" file and then add it as a Reference to the "Project" file, after removing the installed Nuget package.
-
-Then you should be able to get a working build.
-
 ## Actions
 
 There are currently three "Removed" actions to choose from:
